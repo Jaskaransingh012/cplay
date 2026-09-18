@@ -45,7 +45,6 @@ void cli_help(const char *prog_name)
     printf("  %s search \"song\"     Search the local library\n", prog_name);
     printf("  %s --list             List all songs in ~/Music\n", prog_name);
     printf("  %s --help             Show this help message\n", prog_name);
-    printf("  %s --version          Show version information\n", prog_name);
     printf("\n");
     printf("More commands (play, pause, resume, queue, ...) are coming in later phases.\n");
 }
