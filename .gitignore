@@ -53,3 +53,35 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Build artifacts
+build/
+*.o
+*.out
+
+# Final binary
+cplay
+
+# Debug/release build dirs (if you separate them later)
+debug/
+release/
+
+# Editor/IDE junk
+.vscode/
+.vs/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Valgrind / sanitizer output
+*.log
+vgcore.*
+core
+
+# Test-generated audio files (don't commit your local test WAVs)
+tests/*.wav
+test.wav
+
+# Local config (Phase 11+)
+.env
