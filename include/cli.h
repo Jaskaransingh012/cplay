@@ -16,7 +16,8 @@ typedef enum {
     CMD_HELP, //ABOUT THE PLAYER
     CMD_SEARCH, // SEARCH THE MUSIC
     CMD_LIST, // list the songs in library
-    CMD_UNKNOWN // NOT A VALID COMMAND
+    CMD_UNKNOWN, // NOT A VALID COMMAND
+    CMD_PLAY
 } CliCommand;
 
 // for parsing commands and query

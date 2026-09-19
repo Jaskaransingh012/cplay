@@ -32,6 +32,12 @@ CliOptions cli_parser(int argc, char *argv[]) {
         return options;
     }
 
+    if (strcmp(first, "play") == 0) {
+        options.command = CMD_PLAY;
+        if (argc >= 3) options.query = argv[2];
+        return options;
+    }
+
     options.command = CMD_UNKNOWN;
     return options;
 

@@ -3,7 +3,8 @@
 #include <string.h>
 #include "cli.h"
 #include "library.h"
-
+#include "wav.h"
+#include "audio.h"
 
 static char *get_music_dir(void)
 {
@@ -22,6 +23,45 @@ static char *get_music_dir(void)
     snprintf(path, len, "%s/Music", home);
     return path;
 }
+
+
+static int do_play_wav(const char *path) {
+
+    WavFile wav;
+    if(wav_open(&wav, path) != 0) {
+        return CPLAY_EXIT_NOT_FOUND;
+    }
+
+    // Audio device config
+    AudioDevice *dev = NULL;
+
+    if(audio_open(&dev, wav.sample_rate, wav.channels, wav.bits_per_sample) != 0) {
+        return CPLAY_EXIT_ERROR;
+    }
+
+    unsigned char buffer[4096];
+    size_t bytes_read;
+    size_t bytes_per_frame = (size_t)wav.channels * (size_t)(wav.bits_per_sample / 8);
+
+    printf("Playing (%d Hz, %d ch, %d-bit)...\n", wav.sample_rate, wav.channels, wav.bits_per_sample);
+
+    while((bytes_read = wav_read(&wav, buffer, sizeof(buffer))) > 0) {
+
+        size_t frames = bytes_read / bytes_per_frame;
+        if(audio_write(dev, buffer, frames) < 0) break;
+
+    }
+
+    printf("Done\n");
+
+    audio_close(dev);
+    wav_close(&wav);
+
+    return CPLAY_EXIT_OK;
+
+}
+
+
 
 int main(int argc, char *argv[])
 {
@@ -48,7 +88,7 @@ int main(int argc, char *argv[])
             free(music_dir);
             library_free(&lib);
             return CPLAY_EXIT_IO_ERROR;
-            
+
         }
 
         library_print(&lib);
@@ -104,6 +144,14 @@ int main(int argc, char *argv[])
     case CMD_NONE:
         printf("cplay: no arguments given. Try `cplay --help`.\n");
         return CPLAY_EXIT_OK;
+
+    case CMD_PLAY: {
+        if (opts.query == NULL) {
+            fprintf(stderr, "Error: play requires a file path, e.g. cplay play song.wav\n");
+            return CPLAY_EXIT_USAGE;
+        }
+        return do_play_wav(opts.query);
+    }
 
     case CMD_UNKNOWN:
     default:
