@@ -5,6 +5,7 @@
 #include "library.h"
 #include "wav.h"
 #include "audio.h"
+#include "decoder.h"
 
 static char *get_music_dir(void)
 {
@@ -27,25 +28,29 @@ static char *get_music_dir(void)
 
 static int do_play_wav(const char *path) {
 
-    WavFile wav;
-    if(wav_open(&wav, path) != 0) {
+    Decoder *dec;
+
+    if(decoder_open(&dec, path) != 0) {
         return CPLAY_EXIT_NOT_FOUND;
     }
+
+    // Audio format extraction from decoder
+    AudioFormat fmt = decoder_get_format(dec);
 
     // Audio device config
     AudioDevice *dev = NULL;
 
-    if(audio_open(&dev, wav.sample_rate, wav.channels, wav.bits_per_sample) != 0) {
+    if(audio_open(&dev, fmt.sample_rate, fmt.channels, fmt.bits_per_sample) != 0) {
         return CPLAY_EXIT_ERROR;
     }
 
     unsigned char buffer[4096];
     size_t bytes_read;
-    size_t bytes_per_frame = (size_t)wav.channels * (size_t)(wav.bits_per_sample / 8);
+    size_t bytes_per_frame = (size_t)fmt.channels * (size_t)(fmt.bits_per_sample / 8);
 
-    printf("Playing (%d Hz, %d ch, %d-bit)...\n", wav.sample_rate, wav.channels, wav.bits_per_sample);
+    printf("Playing (%d Hz, %d ch, %d-bit)...\n", fmt.sample_rate, fmt.channels, fmt.bits_per_sample);
 
-    while((bytes_read = wav_read(&wav, buffer, sizeof(buffer))) > 0) {
+    while((bytes_read = decoder_read(dec, buffer, sizeof(buffer))) > 0) {
 
         size_t frames = bytes_read / bytes_per_frame;
         if(audio_write(dev, buffer, frames) < 0) break;
@@ -55,7 +60,7 @@ static int do_play_wav(const char *path) {
     printf("Done\n");
 
     audio_close(dev);
-    wav_close(&wav);
+    decoder_close(dec);
 
     return CPLAY_EXIT_OK;
 

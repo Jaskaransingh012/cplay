@@ -21,6 +21,6 @@ AudioFormat decoder_get_format(Decoder *dec);
 
 size_t decoder_read(Decoder *dec, void *buffer, size_t buffer_size);
 
-void decoder_close;
+void decoder_close(Decoder *dec);
 
 #endif
