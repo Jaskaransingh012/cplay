@@ -2,7 +2,7 @@ CC := gcc
 CSTD := -std=c17
 WARN := -Wall -Wextra -Wpedantic
 INC := -Iinclude
-LIBS := -lasound
+LIBS := -lasound -lmpg123
 
 SRC_DIR := src
 BUILD_DIR := build

@@ -1,18 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <mpg123.h>
 #include "mp3.h"
 
 struct Mp3File {
 
     mpg123_handle *handle;
-
     int sample_rate;
     int channels;
-    int encoding;
-
-    long total_samples;
 
 };
 
@@ -40,12 +35,34 @@ int mp3_open(Mp3File **mp3, const char *path) {
     if(handle == NULL) {
 
         fprintf(stderr, "Error, cannot create a hadler of mpg123\n");
+        mpg123_exit();
+
+        return -1;
+
+    }
+
+    if(mpg123_open(handle, path) != MPG123_OK) {
+
+        fprintf(stderr, "Error, cannot open mp3 file\n");
         mpg123_delete(handle);
         mpg123_exit();
 
         return -1;
 
     }
+
+    //forcing the 16-bit signed PCM output
+    mpg123_format_none(handle);
+
+    if(mpg123_format(handle, 44100, MPG123_STEREO | MPG123_MONO, MPG123_ENC_SIGNED_16) != MPG123_OK) {
+
+        fprintf(stderr, "Error, cannot set output format for mp3 file\n");
+        mpg123_close(handle);
+        mpg123_delete(handle);
+        mpg123_exit();
+
+    }
+
 
     long sample_rate;
     int channels;
@@ -78,8 +95,6 @@ int mp3_open(Mp3File **mp3, const char *path) {
     file->handle = handle;
     file->sample_rate = sample_rate;
     file->channels = channels;
-    file->encoding = encoding;
-    file->total_samples = mpg123_length(handle);
 
     *mp3 = file;
 
@@ -130,3 +145,12 @@ void mp3_close(Mp3File *mp3) {
     mpg123_exit();
 
 }
+
+int mp3_get_sample_rate(Mp3File *mp3) {
+    return mp3->sample_rate;
+}
+
+int mp3_get_channels(Mp3File *mp3) {
+    return mp3->channels;
+}
+

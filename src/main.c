@@ -26,7 +26,7 @@ static char *get_music_dir(void)
 }
 
 
-static int do_play_wav(const char *path) {
+static int do_play(const char *path) {
 
     Decoder *dec;
 
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Error: play requires a file path, e.g. cplay play song.wav\n");
             return CPLAY_EXIT_USAGE;
         }
-        return do_play_wav(opts.query);
+        return do_play(opts.query);
     }
 
     case CMD_UNKNOWN:
