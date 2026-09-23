@@ -6,6 +6,7 @@
 #include "wav.h"
 #include "audio.h"
 #include "decoder.h"
+#include "player.h"
 
 static char *get_music_dir(void)
 {
@@ -32,40 +33,22 @@ static char *get_music_dir(void)
 
 static int do_play(const char *path) {
 
-    Decoder *dec;
-
-    if(decoder_open(&dec, path) != 0) {
+    Player player;
+    if (player_load(&player, path) != 0) {
         return CPLAY_EXIT_NOT_FOUND;
     }
 
-    // Audio format extraction from decoder
-    AudioFormat fmt = decoder_get_format(dec);
+    printf("Playing (%d Hz, %d ch, %d-bit)...\n",
+           player.format.sample_rate, player.format.channels, player.format.bits_per_sample);
 
-    // Audio device config
-    AudioDevice *dev = NULL;
+    player_play(&player);
 
-    if(audio_open(&dev, fmt.sample_rate, fmt.channels, fmt.bits_per_sample) != 0) {
-        return CPLAY_EXIT_ERROR;
+    while (player_tick(&player)) {
+        /* one chunk per iteration — Phase 7 will check keyboard input here */
     }
 
-    unsigned char buffer[4096];
-    size_t bytes_read;
-    size_t bytes_per_frame = (size_t)fmt.channels * (size_t)(fmt.bits_per_sample / 8);
-
-    printf("Playing (%d Hz, %d ch, %d-bit)...\n", fmt.sample_rate, fmt.channels, fmt.bits_per_sample);
-
-    while((bytes_read = decoder_read(dec, buffer, sizeof(buffer))) > 0) {
-
-        size_t frames = bytes_read / bytes_per_frame;
-        if(audio_write(dev, buffer, frames) < 0) break;
-
-    }
-
-    printf("Done\n");
-
-    audio_close(dev);
-    decoder_close(dec);
-
+    printf("Done.\n");
+    player_stop(&player);
     return CPLAY_EXIT_OK;
 
 }
