@@ -9,6 +9,7 @@
 
 static char *get_music_dir(void)
 {
+
     const char *home = getenv("HOME"); // read environment variables from the os
     if (home == NULL) {
         fprintf(stderr, "Error: HOME environment variable not set\n");
@@ -21,8 +22,11 @@ static char *get_music_dir(void)
         fprintf(stderr, "Error: out of memory\n");
         return NULL;
     }
+
     snprintf(path, len, "%s/Music", home);
+
     return path;
+
 }
 
 

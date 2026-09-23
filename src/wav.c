@@ -168,6 +168,7 @@ size_t wav_read(WavFile *wav, void *buffer, size_t buffer_size)
     size_t got = fread(buffer, 1, to_read, wav->file);
     wav->bytes_remaining -= (unsigned int)got;
     return got;
+    
 }
 
 void wav_close(WavFile *wav)

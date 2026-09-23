@@ -26,6 +26,9 @@ typedef struct {
 
 
 int player_load(Player *player, const char *path);
+
+int  player_tick(Player *player); // -> return 1 audio left and 0 audio dead
+
 void player_play(Player *player);
 void player_pause(Player *player);
 void player_resume(Player *player);
