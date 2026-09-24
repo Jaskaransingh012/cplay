@@ -6,6 +6,7 @@
 #include "wav.h"
 #include "audio.h"
 #include "decoder.h"
+#include "terminal.h"
 #include "player.h"
 
 static char *get_music_dir(void)
@@ -41,13 +42,68 @@ static int do_play(const char *path) {
     printf("Playing (%d Hz, %d ch, %d-bit)...\n",
            player.format.sample_rate, player.format.channels, player.format.bits_per_sample);
 
-    player_play(&player);
+    printf("[p] Pause  [r] Resume  [q] Quit\n");
 
-    while (player_tick(&player)) {
-        /* one chunk per iteration — Phase 7 will check keyboard input here */
+    if (terminal_enable_raw_mode() != 0) {
+        fprintf(stderr, "Warning: could not enable raw terminal mode, controls disabled\n");
     }
 
-    printf("Done.\n");
+
+    player_play(&player);
+
+    int quit_requested = 0;
+
+    while (player_tick(&player)) {
+
+        if(terminal_was_interrupted()) {
+
+            printf("\nInterrupted.\n");
+            break;
+
+        }
+
+        char key = terminal_check_key();
+
+        switch (key)
+        {
+        case 'p':
+            /* code */
+            player_pause(&player);
+            printf("\rPaused.  ");
+            fflush(stdout);
+            break;
+
+        case 'r':
+
+            player_resume(&player);
+            printf("\rResumed. ");
+            fflush(stdout);
+            break;
+
+        case 'q':
+
+            quit_requested = 1;
+            break;
+
+        default:
+            break;
+        }
+
+        if(quit_requested) break;
+
+    }
+
+    if(quit_requested) {
+
+        printf("\nStooped.\n");
+
+    }
+    else {
+
+        printf("\nDone.\n");
+
+    }
+
     player_stop(&player);
     return CPLAY_EXIT_OK;
 
