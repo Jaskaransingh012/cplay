@@ -4,6 +4,10 @@
 
 typedef struct Mp3File Mp3File;
 
+
+int mp3_global_init(void);
+void mp3_global_exit(void);
+
 int mp3_open(Mp3File **mp3, const char *path);
 size_t mp3_read(Mp3File *mp3, void *buffer, size_t buffer_size);
 void mp3_close(Mp3File *mp3);
